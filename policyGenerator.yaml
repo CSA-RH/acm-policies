@@ -1,0 +1,22 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: policies
+policyDefaults:
+  namespace: default
+  remediationAction: enforce
+placementBindingDefaults:
+  name: global-binding
+policies:
+  - name: kubeadmin-removed
+    disabled: false
+    placement:
+      placementPath: placements/placement-default.yaml
+    manifests:
+      - path: policies/kubeadmin-removed.yaml
+  - name: openshift-gitops-installed
+    disabled: false
+    placement:
+      placementPath: placements/placement-default.yaml
+    manifests:
+      - path: policies/gitops-installed.yaml
