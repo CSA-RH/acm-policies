@@ -1,7 +1,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: PolicyGenerator
 metadata:
-  name: gitops-policy
+  name: acm-demo-policies
 policyDefaults:
   namespace: default
   placement:
@@ -17,3 +17,12 @@ policies:
       policy.open-cluster-management.io/standards: NIST SP 800-53
       policy.open-cluster-management.io/categories: CM Configuration Management
       policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+
+  - name: kubeadmin-removed
+    manifests:
+      - path: kubeadmin-secret.yaml
+    complianceType: mustnothave
+    policyAnnotations:
+      policy.open-cluster-management.io/standards: NIST SP 800-53
+      policy.open-cluster-management.io/categories: AC Access Control
+      policy.open-cluster-management.io/controls: AC-2 Account Management
