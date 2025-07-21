@@ -1,0 +1,125 @@
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-kubeadmin-removed
+  namespace: default
+spec:
+  clusterSets:
+    - default
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: In
+              values:
+                - cluster2-sno
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: placement-openshift-gitops-installed
+  namespace: default
+spec:
+  clusterSets:
+    - default
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: name
+              operator: In
+              values:
+                - cluster2-sno
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-kubeadmin-removed
+  namespace: default
+placementRef:
+  name: placement-kubeadmin-removed
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+  - name: kubeadmin-removed
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: binding-openshift-gitops-installed
+  namespace: default
+placementRef:
+  name: placement-openshift-gitops-installed
+  kind: Placement
+  apiGroup: cluster.open-cluster-management.io
+subjects:
+  - name: openshift-gitops-installed
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: kubeadmin-removed
+  namespace: default
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: kubeadmin-removed
+        spec:
+          object-templates:
+            - complianceType: mustnothave
+              objectDefinition:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: kubeadmin
+                  namespace: kube-system
+                type: Opaque
+          remediationAction: enforce
+          severity: low
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: openshift-gitops-installed
+  namespace: default
+spec:
+  disabled: false
+  remediationAction: enforce
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: openshift-gitops-installed
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: openshift-gitops-operator
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: openshift-gitops-operator
+                  namespace: openshift-gitops-operator
+                spec:
+                  channel: stable
+                  name: openshift-gitops-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+          remediationAction: enforce
+          severity: low
