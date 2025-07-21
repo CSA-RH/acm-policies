@@ -1,0 +1,18 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PolicyGenerator
+metadata:
+  name: acm-policies
+policyDefaults:
+  namespace: default
+  placement:
+    clusterSelectors:
+      name: cluster2-sno
+  remediationAction: inform
+policies:
+  - name: openshift-gitops-installed
+    manifests:
+      - path: openshift-gitops-subscription.yaml
+  - name: kubeadmin-removed
+    complianceType: mustnothave
+    manifests:
+      - path: kubeadmin-pass.yaml
