@@ -1,18 +1,36 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: PolicyGenerator
 metadata:
-  name: acm-policies
+  name: policy-generator
+placementBindingDefaults:
+  name: binding-demo
 policyDefaults:
   namespace: default
-  placement:
-    clusterSelectors:
-      name: cluster2-sno
   remediationAction: inform
+  placement:
+    kind: Placement
+    apiVersion: cluster.open-cluster-management.io/v1beta1
 policies:
-  - name: openshift-gitops-installed
-    manifests:
-      - path: openshift-gitops-subscription.yaml
   - name: kubeadmin-removed
-    complianceType: mustnothave
-    manifests:
-      - path: kubeadmin-pass.yaml
+    disabled: false
+    policyAnnotations:
+      policy.open-cluster-management.io/categories: CM Configuration Management
+      policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+      policy.open-cluster-management.io/standards: NIST SP 800-53
+    policyTemplates:
+      - objectDefinition:
+          apiVersion: policy.open-cluster-management.io/v1
+          kind: ConfigurationPolicy
+          metadata:
+            name: kubeadmin-removed
+          spec:
+            object-templates:
+              - complianceType: mustnothave
+                objectDefinition:
+                  apiVersion: v1
+                  kind: Secret
+                  metadata:
+                    name: kubeadmin
+                    namespace: kube-system
+            remediationAction: inform
+            severity: low
